@@ -2,6 +2,12 @@ Leaflet.imageTransform
 ======================
 
 Transform images by 4 anchor points
+
+
+##Demo
+
+Check out the [demo](http://originalsin.github.io/Leaflet.imageTransform/examples/ImageTransform.html)
+
 ##Use
 
 ```
