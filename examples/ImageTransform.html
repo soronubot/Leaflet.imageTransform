@@ -21,12 +21,7 @@
 			map = new L.Map('map', {layers: [cloudmade], center: new L.LatLng(56, 137.3), zoom: 9});
 
         var anchors = [[56.344192, 136.59558], [56.344192, 137.8782], [55.613245, 137.8782], [55.613245, 136.59558]]; // TopLeft, TopRight, BottomRight, BottomLeft on image
-        var options = {
-            opacity: 0.5
-            ,
-            clip: [[56.301281, 136.90579],[56.150009, 137.83902],[55.639533, 137.53169],[55.788635, 136.60979],[56.301281, 136.90579]]  // clip polygon
-        };
-        var gmxImage = new L.ImageTransform('image.jpg', anchors, options);
+        var gmxImage = new L.ImageTransform('image.jpg', anchors, { opacity: 0.5 });
 		map.addLayer(gmxImage);
 
 		// To modify the anchor points on image
@@ -47,13 +42,7 @@
 		polygon.editing.enable();
 		map.addLayer(polygon);
 		polygon.disableAddRemovePoints();
-		polygon.on('edit', function() {
-			//console.log('Polygon was edited!', arguments);
-            //gmxImage.setClip(options.clip);
-		});
 		polygon.on('drag', function(ev) {
-			//console.log('drag', arguments);
-            //gmxImage.setClip();
             var newAnchors = [];
             for(var i = 0, len = ev.target._latlngs.length; i < len; i++) {
                 var marker = ev.target._latlngs[i];

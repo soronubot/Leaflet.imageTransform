@@ -11,7 +11,9 @@ Check out the [demo](http://originalsin.github.io/Leaflet.imageTransform/example
 ##Use
 
 ```
-var gmxImage = new L.ImageTransform('image.jpg', anchors, options);
+var anchors = [[56.344192, 136.59558], [56.344192, 137.8782], [55.613245, 137.8782], [55.613245, 136.59558]]; // TopLeft, TopRight, BottomRight, BottomLeft on image
+var gmxImage = new L.ImageTransform('image.jpg', anchors, { opacity: 0.5 });
+map.addLayer(gmxImage);
 ```
 
 ###Options
