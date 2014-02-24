@@ -42,6 +42,7 @@ L.ImageTransform = L.ImageOverlay.extend({
 		var image   = this._image;
         if (image.complete) {
             image.style.transformOrigin = 'left top';
+            image.style.webkitTransformOrigin = 'left top';
             image.style[L.DomUtil.TRANSFORM] = this._getTransform();
         }
 	},
