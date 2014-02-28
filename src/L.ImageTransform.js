@@ -22,54 +22,45 @@ L.ImageTransform = L.ImageOverlay.extend({
 	_animateZoom: function (e) {
 		var map = this._map,
 		    image = this._image,
-		    scale = map.getZoomScale(e.zoom),
-		    nw = this._bounds.getNorthWest(),
-		    se = this._bounds.getSouthEast(),
-		    topLeft = map._latLngToNewLayerPoint(nw, e.zoom, e.center),
-		    size = map._latLngToNewLayerPoint(se, e.zoom, e.center)._subtract(topLeft),
-		    origin = topLeft._add(size._multiplyBy((1 / 2) * (1 - 1 / scale)));
-
-            // TODO: calc topLeft shift with scale for animation
-            image.style[L.DomUtil.TRANSFORM] = this._getTransform(scale, origin);
-//		    L.DomUtil.getTranslateString(origin) + ' scale(' + scale + ') ';
+		    anchors = this._anchors,
+            pixels = [];
+        for (var i = 0, len = anchors.length; i < len; i++) {
+            var p = map._latLngToNewLayerPoint(anchors[i], e.zoom, e.center);
+            pixels.push(p);
+        }
+        image.style[L.DomUtil.TRANSFORM] = this._getTransform(pixels);
+	},
+    _reset: function () {
+		var image = this._image;
+        if (image && image.complete) {
+            var map = this._map,
+                anchors = this._anchors,
+                pixels = [];
+            for (var i = 0, len = anchors.length; i < len; i++) {
+                var p = map.latLngToLayerPoint(anchors[i]);
+                pixels.push(p);
+            }
+            image.style[L.DomUtil.TRANSFORM] = this._getTransform(pixels);
+        }
 	},
 	_onImageLoad: function () {
 		this.fire('load');
+		this._image.style.transformOrigin = 'left top';
 		this._reset();
 	},
-
-	_reset: function () {
-		var image   = this._image;
-        if (image.complete) {
-            image.style.transformOrigin = 'left top';
-            image.style.webkitTransformOrigin = 'left top';
-            image.style[L.DomUtil.TRANSFORM] = this._getTransform();
-        }
+    _getTransform: function (arr) {
+        return this.getMatrix3dCSS(this._getMatrix3d(arr));
 	},
-    _getTransform: function (scale, origin) {
-        return this.getMatrix3dCSS(this._getMatrix3d(), scale, origin);
-	},
-    getMatrix3dCSS: function (arr, scale, origin)	{		// get CSS atribute matrix3d
-        var xscale = arr[0] * (scale || 1);
-        var yscale = arr[4] * (scale || 1);
-        var tx = arr[2] / (scale || 1);
-        var ty = arr[5] / (scale || 1);
+    getMatrix3dCSS: function(arr)	{		// get CSS atribute matrix3d
         var css = 'matrix3d(';
-        css += xscale.toFixed(9) + ',' + arr[3].toFixed(9) + ', 0,' + arr[6].toFixed(9);
-        css += ',' + arr[1].toFixed(9) + ',' + yscale.toFixed(9) + ', 0,' + arr[7].toFixed(9);
-        css += ',0, 0, 1, 0';
-        css += ',' + tx.toFixed(9) + ',' + ty.toFixed(9) + ', 0, 1)';
+        css += arr[0].toFixed(9) + "," + arr[3].toFixed(9) + ", 0," + arr[6].toFixed(9);
+        css += "," + arr[1].toFixed(9) + "," + arr[4].toFixed(9) + ", 0," + arr[7].toFixed(9);
+        css += ",0, 0, 1, 0";
+        css += "," + arr[2].toFixed(9) + "," + arr[5].toFixed(9) + ", 0, 1)";
         return css;
     },
-    _getMatrix3d: function () {
-        var anchors = this._anchors;
-        var res = [];
-        for (var i = 0, len = anchors.length; i < len; i++) {
-            var p = this._map.latLngToLayerPoint(anchors[i]);
-            res.push(p);
-        }
-
-        var matrix3d = this.getMatrix3d(this._image.width, this._image.height, res);
+    _getMatrix3d: function (arr) {
+        var matrix3d = this.getMatrix3d(this._image.width, this._image.height, arr);
         this._matrix3d = matrix3d;
         return matrix3d;
     },
