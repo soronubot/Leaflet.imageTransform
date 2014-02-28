@@ -46,6 +46,7 @@ L.ImageTransform = L.ImageOverlay.extend({
 	_onImageLoad: function () {
 		this.fire('load');
 		this._image.style.transformOrigin = 'left top';
+        this._image.style.webkitTransformOrigin = 'left top';
 		this._reset();
 	},
     _getTransform: function (arr) {
