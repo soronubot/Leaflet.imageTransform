@@ -6,12 +6,13 @@ Transform images by 4 anchor points
 
 ##Demo
 
-Check out the [demo](http://originalsin.github.io/Leaflet.imageTransform/examples/ImageTransform.html)
+Check out the [demo](http://scanex.github.io/Leaflet.imageTransform/examples/ImageTransform.html)
 
 ##Use
 
 ```
-var anchors = [[56.344192, 136.59558], [56.344192, 137.8782], [55.613245, 137.8782], [55.613245, 136.59558]]; // TopLeft, TopRight, BottomRight, BottomLeft on image
+// TopLeft, TopRight, BottomRight, BottomLeft on image
+var anchors = [[56.344192, 136.59558], [56.344192, 137.8782], [55.613245, 137.8782], [55.613245, 136.59558]];
 var gmxImage = new L.ImageTransform('image.jpg', anchors, { opacity: 0.5 });
 map.addLayer(gmxImage);
 ```
@@ -26,7 +27,7 @@ map.addLayer(gmxImage);
 
 ##Methods:
 
-###.setAnchors(data)
+###setAnchors(data)
 Set new 4 anchor points:
 
 ```
