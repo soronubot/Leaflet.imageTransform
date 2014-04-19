@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Leaflet Quick Start Guide Example</title>
+	<meta charset="utf-8" />
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+
+	<script src="../src/L.ImageTransform.js"></script>
+    <style>
+        html, body, #map {
+            height: 100%;
+            width: 100%;
+            margin: 0px;
+        }
+    </style>
+</head>
+<body>
+	<div id="map"></div>
+
+	<script>
+		var cloudmadeUrl = 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+			cloudmade = new L.TileLayer(cloudmadeUrl, {maxZoom: 18}),
+			map = new L.Map('map', {layers: [cloudmade], center: new L.LatLng(56, 137.3), zoom: 9});
+
+        var anchors = [[56.344192, 136.59558], [56.344192, 137.8782], [55.613245, 137.8782], [55.613245, 136.59558]]; // TopLeft, TopRight, BottomRight, BottomLeft on image
+        var options = {
+            opacity: 0.5,
+            clip: [[56.301281, 136.90579],[56.150009, 137.83902],[55.639533, 137.53169],[55.788635, 136.60979],[56.301281, 136.90579]]  // clip polygon
+        };
+        var gmxImage = new L.ImageTransform('image.jpg', anchors, options);
+		map.addLayer(gmxImage);
+	</script>
+</body>
+</html>
