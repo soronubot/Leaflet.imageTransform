@@ -2,6 +2,7 @@ L.ImageTransform = L.ImageOverlay.extend({
     initialize: function (url, anchors, options) { // (String, LatLngBounds, Object)
         L.ImageOverlay.prototype.initialize.call(this, url, anchors, options);
         this.setAnchors(anchors);
+        
     },
 
     setAnchors: function (anchors) {
@@ -18,6 +19,31 @@ L.ImageTransform = L.ImageOverlay.extend({
             this._reset();
         }
     },
+    
+    setClip: function(clipLatLngs) {
+        var matrix3d = this._matrix3d,
+            topLeft = this._map.latLngToLayerPoint(this._bounds.getNorthWest()),
+            matrix3d_inverse = L.ImageTransform.m4_inverse([
+                matrix3d[0], matrix3d[3], 0, matrix3d[6],
+                matrix3d[1], matrix3d[4], 0, matrix3d[7],
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            ]);
+        
+        var pixelClipPoints = [];
+        
+        for (var p = 0; p < clipLatLngs.length; p++) {
+            var point = this._map.latLngToLayerPoint(clipLatLngs[p]);
+            pixelClipPoints.push(L.ImageTransform.transformPoint(matrix3d_inverse, point.x - topLeft.x, point.y - topLeft.y));
+        }
+        
+        this.setClipPixels(pixelClipPoints);
+    },
+    
+    setClipPixels: function(pixelClipPoints) {
+        this._pixelClipPoints = pixelClipPoints;
+        this._drawCanvas();
+    }, 
 
     _initImage: function () {
         this._image = L.DomUtil.create('div', 'leaflet-image-layer');
@@ -62,7 +88,7 @@ L.ImageTransform = L.ImageOverlay.extend({
     },
 
     _reset: function () {
-        var div     = this._image,
+        var div = this._image,
             map = this._map,
             imgNode = this.options.clip ? this._canvas : this._imgNode,
             topLeft = map.latLngToLayerPoint(this._bounds.getNorthWest()),
@@ -83,10 +109,10 @@ L.ImageTransform = L.ImageOverlay.extend({
             imgNode.style.width  = size.x + 'px';
             imgNode.style.height = size.y + 'px';
         }
-        var matrix3d = this._getMatrix3d(pixels);
-        imgNode.style[L.DomUtil.TRANSFORM] = this._getMatrix3dCSS(matrix3d);
+        this._matrix3d = this._getMatrix3d(pixels);
+        imgNode.style[L.DomUtil.TRANSFORM] = this._getMatrix3dCSS(this._matrix3d);
         if (this.options.clip) {
-            this._drawCanvas(matrix3d);
+            this.setClip(this.options.clip);
         }
     },
 
@@ -103,40 +129,25 @@ L.ImageTransform = L.ImageOverlay.extend({
         return L.ImageTransform.getRectangleMatrix3d(this._imgNode.width, this._imgNode.height, points);
     },
 
-    _drawCanvas: function (matrix3d) {
-        var options = this.options,
-            topLeft = this._map.latLngToLayerPoint(this._bounds.getNorthWest()),
-            matrix3d_inverse = L.ImageTransform.m4_inverse([
-                matrix3d[0], matrix3d[3], 0, matrix3d[6],
-                matrix3d[1], matrix3d[4], 0, matrix3d[7],
-                0, 0, 1, 0,
-                0, 0, 0, 1
-                //matrix3d[2], matrix3d[5], 0, 1
-            ]),
-            canvas = this._canvas,
+    _drawCanvas: function () {
+        var canvas = this._canvas,
             ctx = canvas.getContext('2d');
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = ctx.createPattern(this._imgNode, "no-repeat");
 
-        if (options.clip) {
-            ctx.beginPath();
-            for (var i = 0, len = options.clip.length; i < len; i++) {
-                var xy = options.clip[i],
-                    p = this._map.latLngToLayerPoint(new L.LatLng(xy[0], xy[1])),
-                    pix = L.ImageTransform.transformPoint(matrix3d_inverse, p.x - topLeft.x, p.y - topLeft.y);
-                if (i === 0)    ctx.moveTo(pix.x, pix.y);
-                else            ctx.lineTo(pix.x, pix.y);
-            }
-            ctx.closePath();
-        } else {
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.beginPath();
+        for (var i = 0, len = this._pixelClipPoints.length; i < len; i++) {
+            var pix = this._pixelClipPoints[i];
+            ctx[i ? 'lineTo' : 'moveTo'](pix.x, pix.y)
         }
+        ctx.closePath();
         ctx.fill();
     }
 });
 
-L.ImageTransform.getRectangleMatrix3d = function (width, height, points) { // get matrix3d by 4 anchor points [topLeft, topRight, bottomLeft, bottomRight]
+// get matrix3d by 4 anchor points [topLeft, topRight, bottomLeft, bottomRight]
+L.ImageTransform.getRectangleMatrix3d = function (width, height, points) {
     var w2 = width/2,
         h2 = height/2,
         aM = [
@@ -215,7 +226,7 @@ L.ImageTransform.transformPoint = function (arr, x, y) {   // get transform poin
     }
 }
 
-L.ImageTransform.m4_inverse = function(arr) {       // inverse matrix 4õ4
+L.ImageTransform.m4_inverse = function(arr) {       // inverse matrix 4x4
     var m4_submat = function(mat, i, j) {
         var ti, tj, idst, jdst, res = [];
 
@@ -235,7 +246,7 @@ L.ImageTransform.m4_inverse = function(arr) {       // inverse matrix 4õ4
           - mat[1] * ( mat[3]*mat[8] - mat[6]*mat[5] )
           + mat[2] * ( mat[3]*mat[7] - mat[6]*mat[4] );
     }
-    var m4_det = function(arr) {             // get det matrix 4õ4
+    var m4_det = function(arr) {             // get det matrix 4x4
         var det, msub3, result = 0, i = 1;
         for (var n = 0; n < 4; n++, i *= -1 ) {
             var msub3 = m4_submat( arr, 0, n );
