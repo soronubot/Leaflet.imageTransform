@@ -56,6 +56,13 @@
             infoPrefix = 'http://search.kosmosnimki.ru/QuickLookInfo.aspx?id=',
             currentID = 0,
             currentImage = null,
+            transformCoordinates = function(pol) {
+                var arr = [];
+                for (var i = 0, len = pol.length; i < len; i++) {
+                    arr.push([pol[i][1], pol[i][0]]);
+                }
+                return arr;
+            },
             showOneScene = function(num) {
                 if (num < 0) num = currentID = len - 1;
                 if (num >= len) num = currentID = 0;
@@ -69,17 +76,12 @@
                     anchors = [
                         [maxy, minx],
                         [maxy, maxx],
-                        [miny, minx],
-                        [miny, maxx]
+                        [miny, maxx],
+                        [miny, minx]
                     ], // TopLeft, TopRight, BottomRight, BottomLeft on image
                     coords = item.geometry.coordinates[0],
-                    clip = [
-                        coords[0].reverse(),
-                        coords[1].reverse(),
-                        coords[2].reverse(),
-                        coords[3].reverse(),
-                        coords[4].reverse()
-                    ];  // clip polygon
+                    clip = transformCoordinates(coords);  // clip polygon
+
                 if (platform == "WV01" || platform == "WV02" || platform == "QB02" || (platform == "GE01" && item.id.length == 16)) {
                     minx = Math.min(item.x1, item.x2, item.x3, item.x4);
                     maxx = Math.max(item.x1, item.x2, item.x3, item.x4);
@@ -95,29 +97,27 @@
                     anchors = [
                         [maxy, minx],
                         [maxy, maxx],
-                        [miny, minx],
-                        [miny, maxx]
+                        [miny, maxx],
+                        [miny, minx]
                     ];
                 } else if (platform == "EROS-B" || platform == "SPOT 5" || platform == "SPOT 6") {
                     anchors = [
                         [item.y1, item.x1],
                         [item.y2, item.x2],
-                        [item.y3, item.x3],
-                        [item.y4, item.x4]
+                        [item.y4, item.x4],
+                        [item.y3, item.x3]
                     ];
                 } else if (platform == "Pleiades") {
                     anchors = [
                         [item.y2, item.x2],
                         [item.y3, item.x3],
-                        [item.y4, item.x4],
-                        [item.y1, item.x1]
+                        [item.y1, item.x1],
+                        [item.y4, item.x4]
                     ];
                 }
                 var options = {
                     opacity: 0.8
-    /*                ,
-                    clip: clip  // clip polygon
-    */
+                    ,clip: clip  // clip polygon
                 };
                 var gmxImage = new L.ImageTransform(url + item.id, anchors, options);
                 map.addLayer(gmxImage);

@@ -88,6 +88,7 @@ L.ImageTransform = L.ImageOverlay.extend({
     },
 
     _reset: function () {
+        if (!this._imgNode.complete) return;
         var div = this._image,
             map = this._map,
             imgNode = this.options.clip ? this._canvas : this._imgNode,
