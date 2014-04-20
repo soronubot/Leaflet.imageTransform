@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Leaflet Quick Start Guide Example</title>
+	<meta charset="utf-8" />
+
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+
+	<script src="../src/L.ImageTransform.js"></script>
+    <style>
+        html, body, #map {
+            height: 100%;
+            width: 100%;
+            margin: 0px;
+        }
+        #controls {
+            position: absolute;
+			left: 54px;
+			top: 11px;
+			z-index: 1;
+			background-color: #ffffff;
+			border-radius: 5px;
+            box-shadow: 0 1px 7px rgba(0,0,0,0.65);
+        }
+        
+        #controls button {
+            border-radius: 5px;
+            
+        }
+        
+        #controls > div{
+            padding: 6px;
+        }
+    </style>
+</head>
+<body>
+	<div id="controls">
+		<div>
+            <button id="prev">Prev</button>
+            <button id="next">Next</button>
+            <span id="timeInfo"></span>
+        </div>
+	</div>
+	<div id="map"></div>
+
+	<script>
+		var cloudmadeUrl = 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+			cloudmade = new L.TileLayer(cloudmadeUrl, {maxZoom: 18}),
+			map = new L.Map('map', {layers: [cloudmade], center: new L.LatLng(46, 33), zoom: 7});
+
+        var items = [{"sat_name":"LANDSAT_8","sat_desc":null,"is_local":null,"date":"2014-04-07","url":"http://earthexplorer.usgs.gov/browse/landsat_8/2014/177/030/LC81770302014097LGN00.jpg","off_nadir":-1,"cloud_cover":33,"x1":32.76373,"y1":42.52591,"x2":35.01495,"y2":42.11012,"x3":35.63191,"y3":43.82482,"x4":33.31739,"y4":44.24386,"id":"LC81770302014097LGN00","path_id":null,"stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[32.76373,42.52591],[35.01495,42.11012],[35.63191,43.82482],[33.31739,44.24386],[32.76373,42.52591]]]}},{"sat_name":"LANDSAT_8","sat_desc":null,"is_local":null,"date":"2014-04-14","url":"http://earthexplorer.usgs.gov/browse/landsat_8/2014/178/028/LC81780282014104LGN00.jpg","off_nadir":-1,"cloud_cover":49,"x1":32.16003,"y1":45.37832,"x2":34.51804,"y2":44.95054,"x3":35.18721,"y3":46.65991,"x4":32.75652,"y4":47.09225,"id":"LC81780282014104LGN00","path_id":null,"stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[32.16003,45.37832],[34.51804,44.95054],[35.18721,46.65991],[32.75652,47.09225],[32.16003,45.37832]]]}},{"sat_name":"LANDSAT_8","sat_desc":null,"is_local":null,"date":"2014-04-16","url":"http://earthexplorer.usgs.gov/browse/landsat_8/2014/176/030/LC81760302014106LGN00.jpg","off_nadir":-1,"cloud_cover":33,"x1":34.32227,"y1":42.52608,"x2":36.57355,"y2":42.11031,"x3":37.19045,"y3":43.82497,"x4":34.87587,"y4":44.24399,"id":"LC81760302014106LGN00","path_id":null,"stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[34.32227,42.52608],[36.57355,42.11031],[37.19045,43.82497],[34.87587,44.24399],[34.32227,42.52608]]]}},{"sat_name":"LANDSAT_8","sat_desc":null,"is_local":null,"date":"2014-04-14","url":"http://earthexplorer.usgs.gov/browse/landsat_8/2014/178/029/LC81780292014104LGN00.jpg","off_nadir":-1,"cloud_cover":27,"x1":31.6855,"y1":43.9532,"x2":33.98828,"y2":43.53167,"x3":34.63014,"y3":45.24379,"x4":32.25955,"y4":45.66918,"id":"LC81780292014104LGN00","path_id":null,"stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[31.6855,43.9532],[33.98828,43.53167],[34.63014,45.24379],[32.25955,45.66918],[31.6855,43.9532]]]}},{"sat_name":"QB02","sat_desc":null,"is_local":null,"date":"2014-04-07","url":"https://browse.digitalglobe.com/imagefinder/showBrowseImage?catalogId=1010010012886400\u0026imageHeight=1024\u0026imageWidth=1024","off_nadir":21,"cloud_cover":0,"x1":33.6655,"y1":45.2437,"x2":33.6673,"y2":44.4583,"x3":33.4516,"y3":44.4434,"x4":33.4635,"y4":45.2371,"id":"1010010012886400","path_id":"1010010012886400","stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[33.663672,45.24372],[33.667416,45.24372],[33.667704,44.968104],[33.667992,44.915976],[33.668136,44.737272],[33.668136,44.67492],[33.667992,44.674776],[33.667848,44.612856],[33.668424,44.595864],[33.668712,44.54748],[33.668856,44.547336],[33.668424,44.520984],[33.667992,44.500536],[33.667848,44.500392],[33.667704,44.484984],[33.667848,44.471736],[33.667272,44.458344],[33.655032,44.457192],[33.644952,44.457336],[33.637752,44.457768],[33.45156,44.443368],[33.453,44.534664],[33.453288,44.55756],[33.454152,44.615016],[33.457608,44.823816],[33.46164,45.106056],[33.463512,45.237096],[33.663672,45.24372]]]}},{"sat_name":"WV01","sat_desc":null,"is_local":null,"date":"2014-04-04","url":"https://browse.digitalglobe.com/imagefinder/showBrowseImage?catalogId=102001002C638E00\u0026imageHeight=1024\u0026imageWidth=1024","off_nadir":28,"cloud_cover":96,"x1":34.8901,"y1":46.1735,"x2":34.8852,"y2":45.8477,"x3":34.6211,"y3":45.831,"x4":34.6214,"y4":46.1554,"id":"102001002C638E00","path_id":"102001002C638E00","stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[34.8894,46.173528],[34.89084,46.173528],[34.889688,46.094184],[34.885224,45.847656],[34.626456,45.831384],[34.620984,45.830952],[34.621128,45.831096],[34.621416,46.155384],[34.806456,46.167912],[34.8894,46.173528]]]}},{"sat_name":"WV02","sat_desc":null,"is_local":null,"date":"2014-04-09","url":"https://browse.digitalglobe.com/imagefinder/showBrowseImage?catalogId=1030010030066200\u0026imageHeight=1024\u0026imageWidth=1024","off_nadir":2,"cloud_cover":0,"x1":32.8912,"y1":45.4145,"x2":33.1004,"y2":45.4143,"x3":33.1002,"y3":45.2946,"x4":32.8912,"y4":45.2946,"id":"1030010030066200","path_id":"1030010030066200","stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[32.891238,45.414486],[32.980122,45.414414],[33.100434,45.414306],[33.100218,45.330534],[33.100182,45.29457],[32.891166,45.29457],[32.89095,45.37143],[32.890914,45.414486],[32.891238,45.414486]]]}},{"sat_name":"LANDSAT_8","sat_desc":null,"is_local":null,"date":"2014-04-05","url":"http://earthexplorer.usgs.gov/browse/landsat_8/2014/179/027/LC81790272014095LGN00.jpg","off_nadir":-1,"cloud_cover":53,"x1":31.09949,"y1":46.80249,"x2":33.5167,"y2":46.3679,"x3":34.21603,"y3":48.07426,"x4":31.72085,"y4":48.51418,"id":"LC81790272014095LGN00","path_id":null,"stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[31.09949,46.80249],[33.5167,46.3679],[34.21603,48.07426],[31.72085,48.51418],[31.09949,46.80249]]]}},{"sat_name":"LANDSAT_8","sat_desc":null,"is_local":null,"date":"2014-04-07","url":"http://earthexplorer.usgs.gov/browse/landsat_8/2014/177/027/LC81770272014097LGN00.jpg","off_nadir":-1,"cloud_cover":20,"x1":34.18942,"y1":46.80248,"x2":36.60668,"y2":46.36787,"x3":37.306,"y3":48.07421,"x4":34.81077,"y4":48.51415,"id":"LC81770272014097LGN00","path_id":null,"stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[34.18942,46.80248],[36.60668,46.36787],[37.306,48.07421],[34.81077,48.51415],[34.18942,46.80248]]]}},{"sat_name":"WV01","sat_desc":null,"is_local":null,"date":"2014-04-04","url":"https://browse.digitalglobe.com/imagefinder/showBrowseImage?catalogId=102001002B1A9C00\u0026imageHeight=1024\u0026imageWidth=1024","off_nadir":31,"cloud_cover":100,"x1":35.0601,"y1":45.9588,"x2":35.0507,"y2":45.57,"x3":34.781,"y3":45.5458,"x4":34.773,"y4":45.9258,"id":"102001002B1A9C00","path_id":"102001002B1A9C00","stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[35.059608,45.95868],[35.060616,45.958824],[35.056152,45.792504],[35.05068,45.570024],[34.780968,45.545832],[34.78068,45.558072],[34.776648,45.760536],[34.773048,45.925848],[35.059608,45.95868]]]}},{"sat_name":"IK-2","sat_desc":null,"is_local":null,"date":"2014-04-06","url":"http://geofuse.geoeye.com/static/browse/ikonos/2/kpms/2014/04/2014040608424500000011603623_0.jpg","off_nadir":19,"cloud_cover":11,"x1":35.311,"y1":45.1107,"x2":35.4643,"y2":45.1119,"x3":35.4639,"y3":45.0034,"x4":35.3111,"y4":45.0026,"id":"2000120959800THC","path_id":"2014040608424500000011603623","stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[35.3110903,45.0025713],[35.3110439,45.056629],[35.3109682,45.1106618],[35.3630133,45.1109393],[35.4123323,45.111337],[35.4642687,45.111862],[35.4641138,45.0575798],[35.4639455,45.0033631],[35.4121468,45.002891],[35.362973,45.0026586],[35.3110903,45.0025713]]]}},{"sat_name":"LANDSAT_8","sat_desc":null,"is_local":null,"date":"2014-04-07","url":"http://earthexplorer.usgs.gov/browse/landsat_8/2014/177/028/LC81770282014097LGN00.jpg","off_nadir":-1,"cloud_cover":24,"x1":33.69636,"y1":45.37874,"x2":36.05436,"y2":44.95097,"x3":36.72352,"y3":46.66029,"x4":34.29285,"y4":47.09262,"id":"LC81770282014097LGN00","path_id":null,"stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[33.69636,45.37874],[36.05436,44.95097],[36.72352,46.66029],[34.29285,47.09262],[33.69636,45.37874]]]}},{"sat_name":"LANDSAT_8","sat_desc":null,"is_local":null,"date":"2014-04-05","url":"http://earthexplorer.usgs.gov/browse/landsat_8/2014/179/028/LC81790282014095LGN00.jpg","off_nadir":-1,"cloud_cover":94,"x1":30.60625,"y1":45.37823,"x2":32.96424,"y2":44.95047,"x3":33.6334,"y3":46.65982,"x4":31.20273,"y4":47.09214,"id":"LC81790282014095LGN00","path_id":null,"stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[30.60625,45.37823],[32.96424,44.95047],[33.6334,46.65982],[31.20273,47.09214],[30.60625,45.37823]]]}},{"sat_name":"LANDSAT_8","sat_desc":null,"is_local":null,"date":"2014-04-14","url":"http://earthexplorer.usgs.gov/browse/landsat_8/2014/178/027/LC81780272014104LGN00.jpg","off_nadir":-1,"cloud_cover":69,"x1":32.6531,"y1":46.80211,"x2":35.07032,"y2":46.3675,"x3":35.76966,"y3":48.07383,"x4":33.27447,"y4":48.51376,"id":"LC81780272014104LGN00","path_id":null,"stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[32.6531,46.80211],[35.07032,46.3675],[35.76966,48.07383],[33.27447,48.51376],[32.6531,46.80211]]]}},{"sat_name":"WV02","sat_desc":null,"is_local":null,"date":"2014-04-15","url":"https://browse.digitalglobe.com/imagefinder/showBrowseImage?catalogId=103001002EC85500\u0026imageHeight=1024\u0026imageWidth=1024","off_nadir":23,"cloud_cover":0,"x1":34.4024,"y1":46.1597,"x2":34.6611,"y2":46.1562,"x3":34.6621,"y3":45.8464,"x4":34.4033,"y4":45.8435,"id":"103001002EC85500","path_id":"103001002EC85500","stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[34.402446,46.159722],[34.448238,46.159146],[34.56333,46.157598],[34.660602,46.156194],[34.661502,46.156158],[34.661538,46.026774],[34.661646,45.96903],[34.661862,45.906606],[34.662006,45.876474],[34.66215,45.84645],[34.555518,45.845334],[34.448346,45.84411],[34.40331,45.843534],[34.403238,45.86301],[34.403094,45.90225],[34.40295,45.963954],[34.402914,45.96399],[34.402734,46.015182],[34.402589999999996,46.09935],[34.402518,46.105722],[34.402446,46.159722]]]}},{"sat_name":"LANDSAT_8","sat_desc":null,"is_local":null,"date":"2014-04-16","url":"http://earthexplorer.usgs.gov/browse/landsat_8/2014/176/028/LC81760282014106LGN00.jpg","off_nadir":-1,"cloud_cover":17,"x1":35.25472,"y1":45.37861,"x2":37.61286,"y2":44.95085,"x3":38.28193,"y3":46.6602,"x4":35.85111,"y4":47.09252,"id":"LC81760282014106LGN00","path_id":null,"stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[35.25472,45.37861],[37.61286,44.95085],[38.28193,46.6602],[35.85111,47.09252],[35.25472,45.37861]]]}},{"sat_name":"LANDSAT_8","sat_desc":null,"is_local":null,"date":"2014-04-16","url":"http://earthexplorer.usgs.gov/browse/landsat_8/2014/176/029/LC81760292014106LGN00.jpg","off_nadir":-1,"cloud_cover":14,"x1":34.78009,"y1":43.95297,"x2":37.08287,"y2":43.53148,"x3":37.72464,"y3":45.24359,"x4":35.35406,"y4":45.66895,"id":"LC81760292014106LGN00","path_id":null,"stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[34.78009,43.95297],[37.08287,43.53148],[37.72464,45.24359],[35.35406,45.66895],[34.78009,43.95297]]]}},{"sat_name":"QB02","sat_desc":null,"is_local":null,"date":"2014-04-11","url":"https://browse.digitalglobe.com/imagefinder/showBrowseImage?catalogId=10100100128B2400\u0026imageHeight=1024\u0026imageWidth=1024","off_nadir":42,"cloud_cover":0,"x1":35.2729,"y1":45.2431,"x2":35.5491,"y2":45.1884,"x3":35.5433,"y3":44.8178,"x4":35.2716,"y4":44.8696,"id":"10100100128B2400","path_id":"10100100128B2400","stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[35.272872,45.243144],[35.405496,45.216936],[35.54892,45.188424],[35.549208,45.188424],[35.548776,45.153576],[35.54748,45.07956],[35.544888,44.903304],[35.543304,44.817768],[35.271576,44.869608],[35.272152,44.971848],[35.272728,44.990424],[35.272728,45.055512],[35.272872,45.243144]]]}},{"sat_name":"LANDSAT_8","sat_desc":null,"is_local":null,"date":"2014-04-07","url":"http://earthexplorer.usgs.gov/browse/landsat_8/2014/177/029/LC81770292014097LGN00.jpg","off_nadir":-1,"cloud_cover":1,"x1":33.22163,"y1":43.9528,"x2":35.52436,"y2":43.5313,"x3":36.16614,"y3":45.24346,"x4":33.79561,"y4":45.66883,"id":"LC81770292014097LGN00","path_id":null,"stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[33.22163,43.9528],[35.52436,43.5313],[36.16614,45.24346],[33.79561,45.66883],[33.22163,43.9528]]]}},{"sat_name":"QB02","sat_desc":null,"is_local":null,"date":"2014-04-09","url":"https://browse.digitalglobe.com/imagefinder/showBrowseImage?catalogId=101001001289D000\u0026imageHeight=1024\u0026imageWidth=1024","off_nadir":23,"cloud_cover":100,"x1":33.9046,"y1":46.0326,"x2":33.9039,"y2":45.9102,"x3":33.6794,"y3":45.8991,"x4":33.6779,"y4":46.0197,"id":"101001001289D000","path_id":"101001001289D000","stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[33.903576,46.032552],[33.905592,46.032552],[33.904008,45.931752],[33.903864,45.910152],[33.685992,45.899496],[33.679368,45.899064],[33.679224,45.90972],[33.677928,46.019736],[33.903576,46.032552]]]}},{"sat_name":"WV01","sat_desc":null,"is_local":null,"date":"2014-04-04","url":"https://browse.digitalglobe.com/imagefinder/showBrowseImage?catalogId=102001002EC55100\u0026imageHeight=1024\u0026imageWidth=1024","off_nadir":23,"cloud_cover":100,"x1":34.654,"y1":46.1624,"x2":34.647,"y2":45.8468,"x3":34.402,"y3":45.8399,"x4":34.3981,"y4":46.1532,"id":"102001002EC55100","path_id":"102001002EC55100","stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[34.653528,46.16244],[34.654536,46.16244],[34.653528,46.1286],[34.649928,45.983448],[34.647048,45.846792],[34.593048,45.845352],[34.40196,45.83988],[34.398936,46.072296],[34.398072,46.153224],[34.527672,46.157832],[34.653528,46.16244]]]}},{"sat_name":"IK-2","sat_desc":null,"is_local":null,"date":"2014-04-06","url":"http://geofuse.geoeye.com/static/browse/ikonos/2/kpms/2014/04/2014040608430060000011603622_0.jpg","off_nadir":11,"cloud_cover":8,"x1":35.3142,"y1":45.1114,"x2":35.4611,"y2":45.111,"x3":35.4608,"y3":45.002,"x4":35.3142,"y4":45.0025,"id":"2000120959500THC","path_id":"2014040608430060000011603622","stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[35.4608028,45.0019611],[35.411128,45.001998],[35.3639782,45.0021805],[35.3142473,45.0025241],[35.314231,45.0569264],[35.3141894,45.111361],[35.3640437,45.1111308],[35.4113064,45.1110268],[35.461103,45.1110177],[35.4609643,45.0564476],[35.4608028,45.0019611]]]}},{"sat_name":"WV01","sat_desc":null,"is_local":null,"date":"2014-04-12","url":"https://browse.digitalglobe.com/imagefinder/showBrowseImage?catalogId=102001002F20BE00\u0026imageHeight=1024\u0026imageWidth=1024","off_nadir":40,"cloud_cover":45,"x1":35.6502,"y1":45.2585,"x2":35.6496,"y2":44.884,"x3":35.2366,"y3":44.8323,"x4":35.2349,"y4":45.1994,"id":"102001002F20BE00","path_id":"102001002F20BE00","stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[35.649864,45.258408],[35.650584,45.258552],[35.650008,45.215784],[35.649864,45.140616],[35.650152,45.11844],[35.649576,44.884008],[35.45532,44.859816],[35.236584,44.832312],[35.236152,44.91252],[35.233272,44.921016],[35.232984,44.92836],[35.233272,44.937288],[35.234856,44.94564],[35.235288,44.952696],[35.235432,44.97948],[35.235144,45.004392],[35.23356,45.020808],[35.234424,45.02916],[35.234568,45.051336],[35.234136,45.066168],[35.234424,45.1206],[35.234856,45.199368],[35.390808,45.221832],[35.649864,45.258408]]]}},{"sat_name":"WV02","sat_desc":null,"is_local":null,"date":"2014-04-06","url":"https://browse.digitalglobe.com/imagefinder/showBrowseImage?catalogId=103001002F05F100\u0026imageHeight=1024\u0026imageWidth=1024","off_nadir":22,"cloud_cover":46,"x1":34.463,"y1":44.8745,"x2":34.4668,"y2":44.7366,"x3":34.2183,"y3":44.7312,"x4":34.2171,"y4":44.8703,"id":"103001002F05F100","path_id":"103001002F05F100","stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[34.462746,44.874486],[34.46325,44.874486],[34.463106,44.861022],[34.462962,44.856846],[34.462746,44.846442],[34.462962,44.837982],[34.462818,44.829126],[34.46325,44.821098],[34.464222,44.812602],[34.465698,44.804178],[34.465086,44.79651],[34.464258,44.78751],[34.465266,44.77941],[34.46595,44.770806],[34.46577,44.762454],[34.466346,44.754318],[34.46721,44.74593],[34.466778,44.73783],[34.46685,44.735382],[34.459794,44.735238],[34.44615,44.735058],[34.421598,44.73459],[34.410834,44.734374],[34.382142,44.73405],[34.373286,44.73387],[34.321626,44.732754],[34.29315,44.732178],[34.291134,44.732142],[34.248366,44.731674],[34.248042,44.731638],[34.220574,44.731242],[34.216038,44.731134],[34.216254,44.737434],[34.21539,44.745642],[34.215246,44.75349],[34.215426,44.76213],[34.215138,44.776242],[34.21503,44.778978],[34.21539,44.787006],[34.215966,44.806158],[34.216038,44.82945],[34.216722,44.852742],[34.216902,44.860878],[34.217118,44.870274],[34.25913,44.871102],[34.31835,44.87211],[34.354674,44.87265],[34.366158,44.872794],[34.410258,44.873586],[34.428546,44.87391],[34.451046,44.874306],[34.462746,44.874486]]]}},{"sat_name":"WV02","sat_desc":null,"is_local":null,"date":"2014-04-15","url":"https://browse.digitalglobe.com/imagefinder/showBrowseImage?catalogId=103001002FCCC900\u0026imageHeight=1024\u0026imageWidth=1024","off_nadir":23,"cloud_cover":3,"x1":34.1638,"y1":46.1649,"x2":34.426,"y2":46.1576,"x3":34.4265,"y3":45.8409,"x4":34.1671,"y4":45.8473,"id":"103001002FCCC900","path_id":"103001002FCCC900","stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[34.163766,46.164942],[34.28757,46.161558],[34.350282,46.159758],[34.426026,46.157598],[34.426206,46.113642],[34.426314,46.102014],[34.426386,46.054314],[34.426458,45.968418],[34.42653,45.95103],[34.426458,45.840906],[34.372494,45.84231],[34.244658,45.845478],[34.167114,45.847314],[34.166754,45.884286],[34.166286,45.929142],[34.166106,45.946566],[34.165674,45.986382],[34.165278,46.017306],[34.165134,46.036566],[34.164666,46.070298],[34.16427,46.103886],[34.163622,46.146906],[34.16337,46.164942],[34.163766,46.164942]]]}},{"sat_name":"WV01","sat_desc":null,"is_local":null,"date":"2014-04-12","url":"https://browse.digitalglobe.com/imagefinder/showBrowseImage?catalogId=102001002C651400\u0026imageHeight=1024\u0026imageWidth=1024","off_nadir":34,"cloud_cover":100,"x1":34.7045,"y1":46.1979,"x2":34.7023,"y2":45.8481,"x3":34.3651,"y3":45.8118,"x4":34.3655,"y4":46.157,"id":"102001002C651400","path_id":"102001002C651400","stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[34.70364,46.197864],[34.705368,46.198008],[34.705224,46.1826],[34.704216,46.081656],[34.703208,45.960264],[34.702344,45.848088],[34.685496,45.84636],[34.365096,45.8118],[34.365096,45.914472],[34.365528,46.156968],[34.508808,46.174392],[34.70364,46.197864]]]}},{"sat_name":"WV02","sat_desc":null,"is_local":null,"date":"2014-04-07","url":"https://browse.digitalglobe.com/imagefinder/showBrowseImage?catalogId=103001002F1D0200\u0026imageHeight=1024\u0026imageWidth=1024","off_nadir":29,"cloud_cover":0,"x1":34.3891,"y1":46.1788,"x2":34.6784,"y2":46.1549,"x3":34.6767,"y3":45.8214,"x4":34.3918,"y4":45.8438,"id":"103001002F1D0200","path_id":"103001002F1D0200","stereo":"NONE","geometry":{"type":"POLYGON","coordinates":[[[34.38909,46.178802],[34.484742,46.170954],[34.57287,46.163682],[34.678386,46.154862],[34.678278,46.09935],[34.678026,46.030194],[34.677702,45.964566],[34.677306,45.900702],[34.677054,45.866862],[34.676982,45.859806],[34.676658,45.82143],[34.551018,45.831366],[34.391754,45.843786],[34.391646,45.878238],[34.391502,45.89613],[34.391286,45.93573],[34.391286,45.941778],[34.391178,45.96345],[34.390962,45.97875],[34.390818,46.00575],[34.390782,46.005786],[34.390026,46.093626],[34.389342,46.157742],[34.38909,46.178802]]]}}];
+        var len = items.length;
+            infoPrefix = 'http://search.kosmosnimki.ru/QuickLookInfo.aspx?id=',
+            currentID = 0,
+            currentImage = null,
+            showOneScene = function(num) {
+                if (num < 0) num = currentID = len - 1;
+                if (num >= len) num = currentID = 0;
+                var item = items[num];
+                    url = 'http://search.kosmosnimki.ru/QuickLookImage.ashx?id=',
+                    platform = item.sat_name,
+                    minx = Math.min(item.x1, Math.min(item.x2, Math.min(item.x3, item.x4))),
+                    maxx = Math.max(item.x1, Math.max(item.x2, Math.max(item.x3, item.x4))),
+                    miny = Math.min(item.y1, Math.min(item.y2, Math.min(item.y3, item.y4))),
+                    maxy = Math.max(item.y1, Math.max(item.y2, Math.max(item.y3, item.y4))),
+                    anchors = [
+                        [maxy, minx],
+                        [maxy, maxx],
+                        [miny, minx],
+                        [miny, maxx]
+                    ], // TopLeft, TopRight, BottomRight, BottomLeft on image
+                    coords = item.geometry.coordinates[0],
+                    clip = [
+                        coords[0].reverse(),
+                        coords[1].reverse(),
+                        coords[2].reverse(),
+                        coords[3].reverse(),
+                        coords[4].reverse()
+                    ];  // clip polygon
+                if (platform == "WV01" || platform == "WV02" || platform == "QB02" || (platform == "GE01" && item.id.length == 16)) {
+                    minx = Math.min(item.x1, item.x2, item.x3, item.x4);
+                    maxx = Math.max(item.x1, item.x2, item.x3, item.x4);
+                    miny = Math.min(item.y1, item.y2, item.y3, item.y4);
+                    maxy = Math.max(item.y1, item.y2, item.y3, item.y4);
+                    var sw = Math.max((maxx - minx), (maxy - miny))/2;
+                    var cx = (maxx + minx)/2;
+                    var cy = (maxy + miny)/2;
+                    minx = cx - sw;
+                    maxy = cy + sw;
+                    maxx = cx + sw;
+                    miny = cy - sw;
+                    anchors = [
+                        [maxy, minx],
+                        [maxy, maxx],
+                        [miny, minx],
+                        [miny, maxx]
+                    ];
+                } else if (platform == "EROS-B" || platform == "SPOT 5" || platform == "SPOT 6") {
+                    anchors = [
+                        [item.y1, item.x1],
+                        [item.y2, item.x2],
+                        [item.y3, item.x3],
+                        [item.y4, item.x4]
+                    ];
+                } else if (platform == "Pleiades") {
+                    anchors = [
+                        [item.y2, item.x2],
+                        [item.y3, item.x3],
+                        [item.y4, item.x4],
+                        [item.y1, item.x1]
+                    ];
+                }
+                var options = {
+                    opacity: 0.8
+    /*                ,
+                    clip: clip  // clip polygon
+    */
+                };
+                var gmxImage = new L.ImageTransform(url + item.id, anchors, options);
+                map.addLayer(gmxImage);
+                var str = (num + 1) + '&nbsp;from:&nbsp;' + (len - 1);
+                str += '<br>platform: ' + item.sat_name;
+                str += '<br>id: <a href="' + infoPrefix + item.id + '" target="_blank">' + item.id + '</a>';
+                str += '<br>date: ' + item.date;
+                
+                document.getElementById('timeInfo').innerHTML = str;
+                return gmxImage;
+            };
+        document.getElementById("prev").onclick = function() {
+            if (currentImage) map.removeLayer(currentImage);
+            currentID--;
+            currentImage = showOneScene(currentID);
+        }
+        
+        document.getElementById("next").onclick = function() {
+            if (currentImage) map.removeLayer(currentImage);
+            currentID++;
+            currentImage = showOneScene(currentID);
+        }
+        currentImage = showOneScene(currentID);
+	</script>
+</body>
+</html>
