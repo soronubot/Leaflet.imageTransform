@@ -25,41 +25,22 @@
 	<div id="map"></div>
 
 	<script>
-		var cloudmadeUrl = 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
-			cloudmade = new L.TileLayer(cloudmadeUrl, {maxZoom: 18}),
-			map = new L.Map('map', {layers: [cloudmade], center: new L.LatLng(56, 137.3), zoom: 9});
+		var osmUrl = 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+			osm = new L.TileLayer(osmUrl, {maxZoom: 18}),
+			map = new L.Map('map', {layers: [osm], center: new L.LatLng(56, 137.3), zoom: 9});
 
         // TopLeft, TopRight, BottomRight, BottomLeft on image
         var anchors = [[56.344192, 136.59558], [56.344192, 137.8782], [55.613245, 137.8782], [55.613245, 136.59558]];
         var gmxImage = new L.ImageTransform('image.jpg', anchors, { opacity: 0.5 });
 		map.addLayer(gmxImage);
 
-		// To modify the anchor points on image
-        L.gmxPolygon = L.Polygon.extend({
-            disableAddRemovePoints: function () {
-                var poly = this.editing._poly;
-                for(var key in this.editing._markerGroup._layers) {
-                    var marker = this.editing._markerGroup._layers[key];
-                    if(marker._index === undefined) marker._icon.style.display = 'none';
-                    else {
-                        marker.off('click');
-                        marker.on('drag', function (ev){poly.fire('drag');}, this);
-                    }
-                }
-            }
-        });
-        var polygon = new L.gmxPolygon(anchors, { fillOpacity: 0 });
-		polygon.editing.enable();
-		map.addLayer(polygon);
-		polygon.disableAddRemovePoints();
-		polygon.on('drag', function(ev) {
-            var newAnchors = [];
-            for(var i = 0, len = ev.target._latlngs.length; i < len; i++) {
-                var marker = ev.target._latlngs[i];
-                newAnchors.push([marker.lat, marker.lng]);
-            }
-            gmxImage.setAnchors(newAnchors);
-		});
+        var updateAnchors = function() {
+            gmxImage.setAnchors(anchorMarkers.map(function(marker){ return marker.getLatLng(); }));
+        }
+        
+        var anchorMarkers = anchors.map(function(anchor) {
+            return L.marker(anchor, {draggable: true}).addTo(map).on('drag', updateAnchors);
+        })
 	</script>
 </body>
 </html>
