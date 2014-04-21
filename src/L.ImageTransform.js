@@ -10,7 +10,7 @@ L.ImageTransform = L.ImageOverlay.extend({
         this._bounds = L.latLngBounds(anchors);
         for (var i = 0, len = anchors.length; i < len; i++) {
             var yx = anchors[i];
-            this._anchors.push(L.latLng(yx[0], yx[1]));
+            this._anchors.push(L.latLng(yx));
         }
         var p = this._anchors[2];
         this._anchors[2] = this._anchors[3];
@@ -43,7 +43,7 @@ L.ImageTransform = L.ImageOverlay.extend({
     setClipPixels: function(pixelClipPoints) {
         this._pixelClipPoints = pixelClipPoints;
         this._drawCanvas();
-    }, 
+    },
 
     _initImage: function () {
         this._image = L.DomUtil.create('div', 'leaflet-image-layer');
@@ -88,7 +88,7 @@ L.ImageTransform = L.ImageOverlay.extend({
     },
 
     _reset: function () {
-        if (!this._imgNode.complete) return;
+        if (this.options.clip && !this._imgNode.complete) return;
         var div = this._image,
             map = this._map,
             imgNode = this.options.clip ? this._canvas : this._imgNode,
