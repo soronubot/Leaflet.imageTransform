@@ -29,13 +29,30 @@
 			osm = new L.TileLayer(osmUrl, {maxZoom: 18}),
 			map = new L.Map('map', {layers: [osm], center: new L.LatLng(56, 137.3), zoom: 9});
 
-        // TopLeft, TopRight, BottomRight, BottomLeft on image
+        // TopLeft, TopRight, BottomRight, BottomLeft corners of the image
         var anchors = [[56.344192, 136.59558], [56.344192, 137.8782], [55.613245, 137.8782], [55.613245, 136.59558]];
-        var gmxImage = new L.ImageTransform('image.jpg', anchors, { opacity: 0.5 });
-		map.addLayer(gmxImage);
+        var clipCoords = [[56.301281, 136.90579],[56.150009, 137.83902],[55.639533, 137.53169],[55.788635, 136.60979],[56.301281, 136.90579]];
+        var image = L.imageTransform('image.jpg', anchors, { opacity: 0.5, clip: clipCoords }).addTo(map);
+        var externalPolygon = L.polygon(anchors, {fill: false}).addTo(map);
+        
+        var clipPolygon = L.polygon(clipCoords, {fill: false, color: 'red'}).addTo(map);
+        clipPolygon.editing.enable();
+        
+        clipPolygon.on('edit', function() {
+            image.setClip(clipPolygon.getLatLngs());
+        })
 
         var updateAnchors = function() {
-            gmxImage.setAnchors(anchorMarkers.map(function(marker){ return marker.getLatLng(); }));
+            
+            var anchors = anchorMarkers.map(function(marker){ return marker.getLatLng(); })
+            image.setAnchors(anchors);
+            externalPolygon.setLatLngs(anchors);
+            clipPolygon.setLatLngs(image.getClip());
+            
+            //TODO: support setLatLngs() Leaflet.Draw
+            //HACK: update editing points
+            clipPolygon.editing.disable();
+            clipPolygon.editing.enable();
         }
         
         var anchorMarkers = anchors.map(function(anchor) {
