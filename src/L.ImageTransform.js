@@ -2,7 +2,6 @@ L.ImageTransform = L.ImageOverlay.extend({
     initialize: function (url, anchors, options) { // (String, LatLngBounds, Object)
         L.ImageOverlay.prototype.initialize.call(this, url, anchors, options);
         this.setAnchors(anchors);
-        
     },
 
     setAnchors: function (anchors) {
@@ -23,18 +22,17 @@ L.ImageTransform = L.ImageOverlay.extend({
     setClip: function(clipLatLngs) {
         var matrix3d = this._matrix3d,
             topLeft = this._map.latLngToLayerPoint(this._bounds.getNorthWest()),
-            matrix3d_inverse = L.ImageTransform.m4_inverse([
-                matrix3d[0], matrix3d[3], 0, matrix3d[6],
-                matrix3d[1], matrix3d[4], 0, matrix3d[7],
-                0, 0, 1, 0,
-                0, 0, 0, 1
-            ]);
+            w2 = this._imgNode.width/2,
+            h2 = this._imgNode.height/2;
         
         var pixelClipPoints = [];
         
+        this.options.clip = clipLatLngs;
+        
         for (var p = 0; p < clipLatLngs.length; p++) {
-            var point = this._map.latLngToLayerPoint(clipLatLngs[p]);
-            pixelClipPoints.push(L.ImageTransform.transformPoint(matrix3d_inverse, point.x - topLeft.x, point.y - topLeft.y));
+            var mercPoint = this._map.latLngToLayerPoint(clipLatLngs[p]),
+                pixel = L.ImageTransform.transformPoint(this._matrix3d_inverse, mercPoint.x - topLeft.x - w2, mercPoint.y - topLeft.y - h2);
+            pixelClipPoints.push(L.point(pixel.x + w2, pixel.y + h2));
         }
         
         this.setClipPixels(pixelClipPoints);
@@ -43,6 +41,15 @@ L.ImageTransform = L.ImageOverlay.extend({
     setClipPixels: function(pixelClipPoints) {
         this._pixelClipPoints = pixelClipPoints;
         this._drawCanvas();
+    },
+    
+    setUrl: function (url) {
+        this._url = url;
+        this._imgNode.src = this._url;
+    },
+    
+    getClip: function() {
+        return this.options.clip;
     },
 
     _initImage: function () {
@@ -82,11 +89,6 @@ L.ImageTransform = L.ImageOverlay.extend({
         this.fire('load');
     },
 
-    setUrl: function (url) {
-        this._url = url;
-        this._imgNode.src = this._url;
-    },
-
     _reset: function () {
         if (this.options.clip && !this._imgNode.complete) return;
         var div = this._image,
@@ -110,10 +112,29 @@ L.ImageTransform = L.ImageOverlay.extend({
             imgNode.style.width  = size.x + 'px';
             imgNode.style.height = size.y + 'px';
         }
-        this._matrix3d = this._getMatrix3d(pixels);
+        var matrix3d = this._matrix3d = this._getMatrix3d(pixels);
+        var matrix3d_inverse = this._matrix3d_inverse = L.ImageTransform.m4_inverse([
+                matrix3d[0], matrix3d[3], 0, matrix3d[6],
+                matrix3d[1], matrix3d[4], 0, matrix3d[7],
+                0, 0, 1, 0,
+                matrix3d[2], matrix3d[5], 0, 1
+            ]);
+                    
         imgNode.style[L.DomUtil.TRANSFORM] = this._getMatrix3dCSS(this._matrix3d);
         if (this.options.clip) {
-            this.setClip(this.options.clip);
+            if (this._pixelClipPoints) {
+                this.options.clip = [];
+                var w2 = this._imgNode.width/2,
+                    h2 = this._imgNode.height/2;
+                for (var p = 0; p < this._pixelClipPoints.length; p++) {
+                    var mercPoint = L.ImageTransform.transformPoint(matrix3d, this._pixelClipPoints[p].x - w2, this._pixelClipPoints[p].y - h2);
+                    this.options.clip.push(this._map.layerPointToLatLng(L.point(mercPoint.x + topLeft.x + w2, mercPoint.y + topLeft.y + h2)));
+                }
+                
+                this._drawCanvas();
+            } else {
+                this.setClip(this.options.clip);
+            }
         }
     },
 
@@ -268,8 +289,8 @@ L.ImageTransform.m4_inverse = function(arr) {       // inverse matrix 4x4
         }
     }
     return [
-        mr[0],  mr[4],  mr[12], mr[1],
-        mr[5],  mr[13], mr[3],  mr[7]
+        mr[0]/mr[15],  mr[4]/mr[15],  mr[12]/mr[15], mr[1]/mr[15],
+        mr[5]/mr[15],  mr[13]/mr[15], mr[3]/mr[15],  mr[7]/mr[15]
     ];
 }
 
