@@ -11,9 +11,7 @@ L.ImageTransform = L.ImageOverlay.extend({
             var yx = anchors[i];
             this._anchors.push(L.latLng(yx));
         }
-        var p = this._anchors[2];
-        this._anchors[2] = this._anchors[3];
-        this._anchors[3] = p;
+        
         if (this._map) {
             this._reset();
         }
@@ -21,9 +19,7 @@ L.ImageTransform = L.ImageOverlay.extend({
     
     setClip: function(clipLatLngs) {
         var matrix3d = this._matrix3d,
-            topLeft = this._map.latLngToLayerPoint(this._bounds.getNorthWest()),
-            w2 = this._imgNode.width/2,
-            h2 = this._imgNode.height/2;
+            topLeft = this._map.latLngToLayerPoint(this._bounds.getNorthWest());
         
         var pixelClipPoints = [];
         
@@ -31,8 +27,8 @@ L.ImageTransform = L.ImageOverlay.extend({
         
         for (var p = 0; p < clipLatLngs.length; p++) {
             var mercPoint = this._map.latLngToLayerPoint(clipLatLngs[p]),
-                pixel = L.ImageTransform.transformPoint(this._matrix3d_inverse, mercPoint.x - topLeft.x - w2, mercPoint.y - topLeft.y - h2);
-            pixelClipPoints.push(L.point(pixel.x + w2, pixel.y + h2));
+                pixel = L.ImageTransform.Utils.project(this._matrix3d_inverse, mercPoint.x - topLeft.x, mercPoint.y - topLeft.y);
+            pixelClipPoints.push(L.point(pixel[0], pixel[1]));
         }
         
         this.setClipPixels(pixelClipPoints);
@@ -65,6 +61,7 @@ L.ImageTransform = L.ImageOverlay.extend({
         if (this.options.clip) {
             this._canvas = L.DomUtil.create('canvas', 'leaflet-canvas-transform');
             this._image.appendChild(this._canvas);
+            this._canvas.style[L.DomUtil.TRANSFORM_ORIGIN] = '0 0';
         } else {
             this._image.appendChild(this._imgNode);
         }
@@ -97,7 +94,10 @@ L.ImageTransform = L.ImageOverlay.extend({
             topLeft = map.latLngToLayerPoint(this._bounds.getNorthWest()),
             size = map.latLngToLayerPoint(this._bounds.getSouthEast())._subtract(topLeft),
             anchors = this._anchors,
-            pixels = [];
+            w = this._imgNode.width, 
+            h = this._imgNode.height,
+            pixels = [],
+            i;
 
         for (var i = 0, len = anchors.length; i < len; i++) {
             var p = map.latLngToLayerPoint(anchors[i]);
@@ -112,23 +112,26 @@ L.ImageTransform = L.ImageOverlay.extend({
             imgNode.style.width  = size.x + 'px';
             imgNode.style.height = size.y + 'px';
         }
-        var matrix3d = this._matrix3d = this._getMatrix3d(pixels);
-        var matrix3d_inverse = this._matrix3d_inverse = L.ImageTransform.m4_inverse([
-                matrix3d[0], matrix3d[3], 0, matrix3d[6],
-                matrix3d[1], matrix3d[4], 0, matrix3d[7],
-                0, 0, 1, 0,
-                matrix3d[2], matrix3d[5], 0, 1
-            ]);
-                    
+        
+        var matrix3d = this._matrix3d = L.ImageTransform.Utils.general2DProjection(
+            0, 0, pixels[0].x, pixels[0].y,
+            w, 0, pixels[1].x, pixels[1].y,
+            w, h, pixels[2].x, pixels[2].y,
+            0, h, pixels[3].x, pixels[3].y
+        );
+        
+        //matrix normalization
+        for(i = 0; i != 9; ++i) matrix3d[i] = matrix3d[i]/matrix3d[8];
+        
+        this._matrix3d_inverse = L.ImageTransform.Utils.adj(matrix3d);
+        
         imgNode.style[L.DomUtil.TRANSFORM] = this._getMatrix3dCSS(this._matrix3d);
         if (this.options.clip) {
             if (this._pixelClipPoints) {
                 this.options.clip = [];
-                var w2 = this._imgNode.width/2,
-                    h2 = this._imgNode.height/2;
                 for (var p = 0; p < this._pixelClipPoints.length; p++) {
-                    var mercPoint = L.ImageTransform.transformPoint(matrix3d, this._pixelClipPoints[p].x - w2, this._pixelClipPoints[p].y - h2);
-                    this.options.clip.push(this._map.layerPointToLatLng(L.point(mercPoint.x + topLeft.x + w2, mercPoint.y + topLeft.y + h2)));
+                    var mercPoint = L.ImageTransform.Utils.project(matrix3d, this._pixelClipPoints[p].x, this._pixelClipPoints[p].y);
+                    this.options.clip.push(this._map.layerPointToLatLng(L.point(mercPoint[0] + topLeft.x, mercPoint[1] + topLeft.y)));
                 }
                 
                 this._drawCanvas();
@@ -143,12 +146,8 @@ L.ImageTransform = L.ImageOverlay.extend({
         css += arr[0].toFixed(9) + "," + arr[3].toFixed(9) + ", 0," + arr[6].toFixed(9);
         css += "," + arr[1].toFixed(9) + "," + arr[4].toFixed(9) + ", 0," + arr[7].toFixed(9);
         css += ",0, 0, 1, 0";
-        css += "," + arr[2].toFixed(9) + "," + arr[5].toFixed(9) + ", 0, 1)";
+        css += "," + arr[2].toFixed(9) + "," + arr[5].toFixed(9) + ", 0, " + arr[8].toFixed(9) + ")";
         return css;
-    },
-
-    _getMatrix3d: function (points) {
-        return L.ImageTransform.getRectangleMatrix3d(this._imgNode.width, this._imgNode.height, points);
     },
 
     _drawCanvas: function () {
@@ -168,132 +167,75 @@ L.ImageTransform = L.ImageOverlay.extend({
     }
 });
 
-// get matrix3d by 4 anchor points [topLeft, topRight, bottomLeft, bottomRight]
-L.ImageTransform.getRectangleMatrix3d = function (width, height, points) {
-    var w2 = width/2,
-        h2 = height/2,
-        aM = [
-            [0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 1, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 1, 0, 0],
-            [0, 0, 0, 0, 0, 1, 0, 0],
-            [0, 0, 0, 0, 0, 1, 0, 0],
-            [0, 0, 0, 0, 0, 1, 0, 0]
-        ],
-        bM = [0, 0, 0, 0, 0, 0, 0, 0],
-        arr = [0, 1, 2, 3, 4, 5, 6, 7];
-    for (var i = 0; i < 4; i++) {
-        var i4 = i + 4,
-            i1 = i % 2,
-            x = points[i].x - w2,
-            y = points[i].y - h2;
-        aM[i][0]  = aM[i4][3] = (i1 === 1 ? w2 : -w2);
-        aM[i][1]  = aM[i4][4] = (i > 1    ? h2 : -h2);
-        aM[i][6]  = (i1 === 1 ? -w2 : w2) * x;
-        aM[i][7]  = (i > 1    ? -h2 : h2) * x;
-        aM[i4][6] = (i1 === 1 ? -w2 : w2) * y;
-        aM[i4][7] = (i > 1    ? -h2 : h2) * y;
-        bM[i]  = x;
-        bM[i4] = y;
-        aM[i][2] = aM[i4][5] = 1;
-        aM[i][3] = aM[i][4] = aM[i][5] = aM[i4][0] = aM[i4][1] = aM[i4][2] = 0;
-    }
-    var kmax, sum,
-        row,
-        col = [],
-        j, k, tmp;
-    for (j = 0; j < 8; j++) {
-        for (i = 0; i < 8; i++)  { col[i] = aM[i][j]; }
-        for (i = 0; i < 8; i++) {
-            row = aM[i];
-            kmax = i < j ? i : j;
-            sum = 0.0;
-            for (k = 0; k < kmax; k++) { sum += row[k] * col[k]; }
-            row[j] = col[i] -= sum;
-        }
-        var p = j;
-        for (i = j + 1; i < 8; i++) {
-            if (Math.abs(col[i]) > Math.abs(col[p])) { p = i; }
-        }
-        if (p !== j) {
-            for (k = 0; k < 8; k++) {
-                tmp = aM[p][k];
-                aM[p][k] = aM[j][k];
-                aM[j][k] = tmp;
-            }
-            tmp = arr[p];
-            arr[p] = arr[j];
-            arr[j] = tmp;
-        }
-        if (aM[j][j] !== 0.0) { for (i = j + 1; i < 8; i++) { aM[i][j] /= aM[j][j]; } }
-    }
-    for (i = 0; i < 8; i++) { arr[i] = bM[arr[i]]; }
-    for (k = 0; k < 8; k++) {
-        for (i = k + 1; i < 8; i++) { arr[i] -= arr[k] * aM[i][k]; }
-    }
-    for (k = 7; k > -1; k--) {
-        arr[k] /= aM[k][k];
-        for (i = 0; i < k; i++) { arr[i] -= arr[k] * aM[i][k]; }
-    }
-    return arr;
-}
-
-L.ImageTransform.transformPoint = function (arr, x, y) {   // get transform point
-    var w = arr[6]*x + arr[7]*y + 1;
-    return {
-        x: (arr[0]*x + arr[1]*y + arr[2])/w,
-        y: (arr[3]*x + arr[4]*y + arr[5])/w
-    }
-}
-
-L.ImageTransform.m4_inverse = function(arr) {       // inverse matrix 4x4
-    var m4_submat = function(mat, i, j) {
-        var ti, tj, idst, jdst, res = [];
-
-        for ( ti = 0; ti < 4; ti++ ) {
-            if ( ti === i ) continue;
-            idst = 3 * (ti + (ti > i ? -1 : 0));
-            for ( tj = 0; tj < 4; tj++ ) {
-                if ( tj === j ) continue;
-                jdst = tj + ( tj > j ? -1 : 0);
-                res[idst + jdst] = mat[ti * 4 + tj ];
-            }
-        }
-        return res;
-    }
-    var m3_det = function(mat) {
-        return mat[0] * ( mat[4]*mat[8] - mat[7]*mat[5] )
-          - mat[1] * ( mat[3]*mat[8] - mat[6]*mat[5] )
-          + mat[2] * ( mat[3]*mat[7] - mat[6]*mat[4] );
-    }
-    var m4_det = function(arr) {             // get det matrix 4x4
-        var det, msub3, result = 0, i = 1;
-        for (var n = 0; n < 4; n++, i *= -1 ) {
-            var msub3 = m4_submat( arr, 0, n );
-            det     = m3_det( msub3 );
-            result += arr[n] * det * i;
-        }
-        return result;
-    }
-    var mdet = m4_det( arr );
-    if( Math.abs( mdet ) < 0.0005 ) return null;
-    var i, j, sign, mtemp, mr = [];
-
-    for ( i = 0; i < 4; i++ ) {
-        for ( j = 0; j < 4; j++ ) {
-            sign = 1 - ( (i +j) % 2 ) * 2;
-            var mtemp = m4_submat( arr, i, j );
-            mr[i+j*4] = ( m3_det( mtemp ) * sign ) / mdet;
-        }
-    }
-    return [
-        mr[0]/mr[15],  mr[4]/mr[15],  mr[12]/mr[15], mr[1]/mr[15],
-        mr[5]/mr[15],  mr[13]/mr[15], mr[3]/mr[15],  mr[7]/mr[15]
-    ];
-}
-
 L.imageTransform = function (url, bounds, options) {
 	return new L.ImageTransform(url, bounds, options);
 };
+
+L.DomUtil.TRANSFORM_ORIGIN = L.DomUtil.testProp(
+        ['transformOrigin', 'WebkitTransformOrigin', 'OTransformOrigin', 'MozTransformOrigin', 'msTransformOrigin']);
+
+//Based on http://math.stackexchange.com/questions/296794/finding-the-transform-matrix-from-4-projected-points-with-javascript
+!function() {
+    function adj(m) { // Compute the adjugate of m
+        return [
+            m[4]*m[8]-m[5]*m[7], m[2]*m[7]-m[1]*m[8], m[1]*m[5]-m[2]*m[4],
+            m[5]*m[6]-m[3]*m[8], m[0]*m[8]-m[2]*m[6], m[2]*m[3]-m[0]*m[5],
+            m[3]*m[7]-m[4]*m[6], m[1]*m[6]-m[0]*m[7], m[0]*m[4]-m[1]*m[3]
+        ];
+    }
+
+    function multmm(a, b) { // multiply two matrices
+        var c = Array(9);
+        for (var i = 0; i != 3; ++i) {
+            for (var j = 0; j != 3; ++j) {
+                var cij = 0;
+                for (var k = 0; k != 3; ++k) {
+                    cij += a[3*i + k] * b[3*k + j];
+                }
+                c[3*i + j] = cij;
+            }
+        }
+        return c;
+    }
+
+    function multmv(m, v) { // multiply matrix and vector
+        return [
+            m[0]*v[0] + m[1]*v[1] + m[2]*v[2],
+            m[3]*v[0] + m[4]*v[1] + m[5]*v[2],
+            m[6]*v[0] + m[7]*v[1] + m[8]*v[2]
+        ];
+    }
+
+    function basisToPoints(x1, y1, x2, y2, x3, y3, x4, y4) {
+        var m = [
+            x1, x2, x3,
+            y1, y2, y3,
+            1,  1,  1
+        ];
+        var v = multmv(adj(m), [x4, y4, 1]);
+        return multmm(m, [
+            v[0], 0, 0,
+            0, v[1], 0,
+            0, 0, v[2]
+        ]);
+    }
+
+    L.ImageTransform.Utils = {
+        general2DProjection: function(
+              x1s, y1s, x1d, y1d,
+              x2s, y2s, x2d, y2d,
+              x3s, y3s, x3d, y3d,
+              x4s, y4s, x4d, y4d
+        ){
+          var s = basisToPoints(x1s, y1s, x2s, y2s, x3s, y3s, x4s, y4s);
+          var d = basisToPoints(x1d, y1d, x2d, y2d, x3d, y3d, x4d, y4d);
+          return multmm(d, adj(s));
+        }, 
+        
+        project: function(m, x, y) {
+            var v = multmv(m, [x, y, 1]);
+            return [v[0]/v[2], v[1]/v[2]];
+        }, 
+        adj: adj
+    }
+}();
