@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Image Transform Plugin: Landsat Images</title>
+	<meta charset="utf-8" />
+
+    <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+    <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
+
+	<script src="../src/L.ImageTransform.js"></script>
+	<script src="data/landsat8.js"></script>
+    <style>
+        html, body, #map {
+            height: 100%;
+            width: 100%;
+            margin: 0px;
+        }
+    </style>
+</head>
+<body>
+	<div id="map"></div>
+	<script>
+		var osmUrl = 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+			osm = new L.TileLayer(osmUrl, {maxZoom: 18}),
+			map = new L.Map('map', {layers: [osm], center: [40, 107], zoom: 6});
+        
+        var showOneScene = function(item) {
+            var minx = Math.min(item.x1, item.x2, item.x3, item.x4),
+                maxx = Math.max(item.x1, item.x2, item.x3, item.x4),
+                miny = Math.min(item.y1, item.y2, item.y3, item.y4),
+                maxy = Math.max(item.y1, item.y2, item.y3, item.y4),
+                anchors = [
+                    [maxy, minx],
+                    [maxy, maxx],
+                    [miny, maxx],
+                    [miny, minx]
+                ],
+                clip = [
+                    [item.y1, item.x1],
+                    [item.y2, item.x2],
+                    [item.y3, item.x3],
+                    [item.y4, item.x4]
+                ],
+                options = {
+                    clip: clip
+                };
+                
+            L.imageTransform(item.url, anchors, options).addTo(map);
+        };
+        
+        for (var s = 0; s < landsat8Scenes.length; s++) {
+            showOneScene(landsat8Scenes[s]);
+        }
+        
+	</script>
+    <a href="https://github.com/ScanEx/Leaflet.imageTransform">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub">
+    </a>
+</body>
+</html>
