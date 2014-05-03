@@ -1,33 +1,32 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Leaflet Image Transformation Example</title>
+	<title>Leaflet Image Transform Interactive Example</title>
 	<meta charset="utf-8" />
 
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.css" />
+    <link rel="stylesheet" href="css/examples.css" />
+    
     <script src="http://cdn.leafletjs.com/leaflet-0.7.2/leaflet.js"></script>
 
 	<script src="http://leaflet.github.io/Leaflet.draw/leaflet.draw.js"></script>
-
-	<script src="../src/L.ImageTransform.js"></script>
+	
+    <script src="../src/L.ImageTransform.js"></script>
     
-    <style>
-        html, body, #map {
-            height: 100%;
-            width: 100%;
-            margin: 0px;
-        }
-    </style>
 </head>
 <body>
 	<div id="map"></div>
+    
+    <div class="outer-info">
+        <span class="leaflet-bar info">Drag markers to transform and edit red polygon to clip</span>
+    </div>
 
 	<script>
 		var osmUrl = 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
 			osm = new L.TileLayer(osmUrl, {maxZoom: 18}),
-			map = new L.Map('map', {layers: [osm], center: new L.LatLng(56, 137.3), zoom: 9});
+			map = new L.Map('map', {layers: [osm], center: new L.LatLng(56, 137.23), zoom: 9});
 
         var anchors = [[56.344192, 136.59558], [56.344192, 137.8782], [55.613245, 137.8782], [55.613245, 136.59558]];
         var clipCoords = [[56.301281, 136.90579],[56.150009, 137.83902],[55.639533, 137.53169],[55.788635, 136.60979],[56.301281, 136.90579]];
@@ -59,8 +58,8 @@
         })
 	</script>
     
-    <a href="https://github.com/ScanEx/Leaflet.imageTransform">
-        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_red_aa0000.png" alt="Fork me on GitHub">
+    <a href="https://github.com/ScanEx/Leaflet.imageTransform" target="_blank">
+        <img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/a6677b08c955af8400f44c6298f40e7d19cc5b2d/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f677261795f3664366436642e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_gray_6d6d6d.png">
     </a>
 </body>
 </html>
