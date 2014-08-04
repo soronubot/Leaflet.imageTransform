@@ -64,6 +64,7 @@ L.ImageTransform = L.ImageOverlay.extend({
             this._canvas.style[L.DomUtil.TRANSFORM_ORIGIN] = '0 0';
         } else {
             this._image.appendChild(this._imgNode);
+            this._imgNode.style[L.DomUtil.TRANSFORM_ORIGIN] = '0 0';
         }
         this._updateOpacity();
 
@@ -81,8 +82,8 @@ L.ImageTransform = L.ImageOverlay.extend({
         if (this.options.clip) {
             this._canvas.width = this._imgNode.width;
             this._canvas.height = this._imgNode.height;
-            this._reset();
         }
+        this._reset();
         this.fire('load');
     },
 
@@ -108,10 +109,6 @@ L.ImageTransform = L.ImageOverlay.extend({
 
         div.style.width  = size.x + 'px';
         div.style.height = size.y + 'px';
-        if (!this.options.clip) {
-            imgNode.style.width  = size.x + 'px';
-            imgNode.style.height = size.y + 'px';
-        }
         
         var matrix3d = this._matrix3d = L.ImageTransform.Utils.general2DProjection(
             0, 0, pixels[0].x, pixels[0].y,
