@@ -65,10 +65,10 @@ L.ImageTransform = L.ImageOverlay.extend({
         } else {
             this._image.appendChild(this._imgNode);
             this._imgNode.style[L.DomUtil.TRANSFORM_ORIGIN] = '0 0';
+            
+            // Hide imgNode until image has loaded
+            this._imgNode.style.display = 'none';
         }
-
-        // Hide imgNode until image has loaded
-        this._imgNode.style.display = 'none';
 
         this._updateOpacity();
 
@@ -86,10 +86,10 @@ L.ImageTransform = L.ImageOverlay.extend({
         if (this.options.clip) {
             this._canvas.width = this._imgNode.width;
             this._canvas.height = this._imgNode.height;
+        } else {
+            // Show imgNode once image has loaded
+            this._imgNode.style.display = 'inherit';
         }
-
-        // Show imgNode once image has loaded
-        this._imgNode.style.display = 'inherit';
 
         this._reset();
         this.fire('load');
