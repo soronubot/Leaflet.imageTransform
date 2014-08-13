@@ -66,6 +66,10 @@ L.ImageTransform = L.ImageOverlay.extend({
             this._image.appendChild(this._imgNode);
             this._imgNode.style[L.DomUtil.TRANSFORM_ORIGIN] = '0 0';
         }
+
+        // Hide imgNode until image has loaded
+        this._imgNode.style.display = 'none';
+
         this._updateOpacity();
 
         //TODO createImage util method to remove duplication
@@ -83,6 +87,10 @@ L.ImageTransform = L.ImageOverlay.extend({
             this._canvas.width = this._imgNode.width;
             this._canvas.height = this._imgNode.height;
         }
+
+        // Show imgNode once image has loaded
+        this._imgNode.style.display = 'inherit';
+
         this._reset();
         this.fire('load');
     },
