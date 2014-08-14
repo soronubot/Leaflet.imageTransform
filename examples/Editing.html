@@ -20,7 +20,7 @@
 	<div id="map"></div>
     
     <div class="outer-info">
-        <span class="leaflet-bar info">Drag markers to transform and edit red polygon to clip</span>
+        <span class="leaflet-bar info">Drag markers to transform; edit red polygon to clip</span>
     </div>
 
 	<script>
@@ -29,7 +29,7 @@
 			map = new L.Map('map', {layers: [osm], center: new L.LatLng(56, 137.23), zoom: 9});
 
         var anchors = [[56.344192, 136.59558], [56.344192, 137.8782], [55.613245, 137.8782], [55.613245, 136.59558]];
-        var clipCoords = [[56.301281, 136.90579],[56.150009, 137.83902],[55.639533, 137.53169],[55.788635, 136.60979],[56.301281, 136.90579]];
+        var clipCoords = [[56.301281, 136.90579],[56.150009, 137.83902],[55.639533, 137.53169],[55.788635, 136.60979]];
         var image = L.imageTransform('img/image.jpg', anchors, { opacity: 0.5, clip: clipCoords }).addTo(map);
         var externalPolygon = L.polygon(anchors, {fill: false}).addTo(map);
         
