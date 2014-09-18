@@ -125,6 +125,11 @@ L.ImageTransform = L.ImageOverlay.extend({
             0, h, pixels[3].x, pixels[3].y
         );
         
+        //something went wrong (for example, target image size is less then one pixel)
+        if (!matrix3d[8]) {
+            return;
+        }
+        
         //matrix normalization
         for(i = 0; i != 9; ++i) matrix3d[i] = matrix3d[i]/matrix3d[8];
         
