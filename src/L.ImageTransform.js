@@ -17,16 +17,20 @@ L.ImageTransform = L.ImageOverlay.extend({
         }
     },
     
+    _latLngToLayerPoint: function(latlng) {
+        return this._map.project(latlng)._subtract(this._map.getPixelOrigin());
+    },
+    
     setClip: function(clipLatLngs) {
         var matrix3d = this._matrix3d,
-            topLeft = this._map.latLngToLayerPoint(this._bounds.getNorthWest());
+            topLeft = this._latLngToLayerPoint(this._bounds.getNorthWest());
         
         var pixelClipPoints = [];
         
         this.options.clip = clipLatLngs;
         
         for (var p = 0; p < clipLatLngs.length; p++) {
-            var mercPoint = this._map.project(clipLatLngs[p])._subtract(this._map.getPixelOrigin()),    // get layer point(not round)
+            var mercPoint = this._latLngToLayerPoint(clipLatLngs[p]),
                 pixel = L.ImageTransform.Utils.project(this._matrix3d_inverse, mercPoint.x - topLeft.x, mercPoint.y - topLeft.y);
             pixelClipPoints.push(L.point(pixel[0], pixel[1]));
         }
@@ -100,8 +104,8 @@ L.ImageTransform = L.ImageOverlay.extend({
         var div = this._image,
             map = this._map,
             imgNode = this.options.clip ? this._canvas : this._imgNode,
-            topLeft = map.latLngToLayerPoint(this._bounds.getNorthWest()),
-            size = map.latLngToLayerPoint(this._bounds.getSouthEast())._subtract(topLeft),
+            topLeft = this._latLngToLayerPoint(this._bounds.getNorthWest()),
+            size = this._latLngToLayerPoint(this._bounds.getSouthEast())._subtract(topLeft),
             anchors = this._anchors,
             w = this._imgNode.width, 
             h = this._imgNode.height,
@@ -109,7 +113,7 @@ L.ImageTransform = L.ImageOverlay.extend({
             i;
 
         for (var i = 0, len = anchors.length; i < len; i++) {
-            var p = map.latLngToLayerPoint(anchors[i]);
+            var p = this._latLngToLayerPoint(anchors[i]);
             pixels.push(L.point(p.x - topLeft.x, p.y - topLeft.y));
         }
 
@@ -143,7 +147,7 @@ L.ImageTransform = L.ImageOverlay.extend({
                     var mercPoint = L.ImageTransform.Utils.project(matrix3d, this._pixelClipPoints[p].x, this._pixelClipPoints[p].y);
                     this.options.clip.push(this._map.layerPointToLatLng(L.point(mercPoint[0] + topLeft.x, mercPoint[1] + topLeft.y)));
                 }
-                
+
                 this._drawCanvas();
             } else {
                 this.setClip(this.options.clip);
