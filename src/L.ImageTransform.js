@@ -26,7 +26,7 @@ L.ImageTransform = L.ImageOverlay.extend({
         this.options.clip = clipLatLngs;
         
         for (var p = 0; p < clipLatLngs.length; p++) {
-            var mercPoint = this._map.latLngToLayerPoint(clipLatLngs[p]),
+            var mercPoint = this._map.project(clipLatLngs[p])._subtract(this._map.getPixelOrigin()),    // get layer point(not round)
                 pixel = L.ImageTransform.Utils.project(this._matrix3d_inverse, mercPoint.x - topLeft.x, mercPoint.y - topLeft.y);
             pixelClipPoints.push(L.point(pixel[0], pixel[1]));
         }
