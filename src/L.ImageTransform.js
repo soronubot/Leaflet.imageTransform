@@ -22,10 +22,8 @@ L.ImageTransform = L.ImageOverlay.extend({
     },
     
     setClip: function(clipLatLngs) {
-        var matrix3d = this._matrix3d,
-            topLeft = this._latLngToLayerPoint(this._bounds.getNorthWest());
-        
-        var pixelClipPoints = [];
+        var topLeft = this._latLngToLayerPoint(this._bounds.getNorthWest()),
+            pixelClipPoints = [];
         
         this.options.clip = clipLatLngs;
         
@@ -102,7 +100,6 @@ L.ImageTransform = L.ImageOverlay.extend({
     _reset: function () {
         if (this.options.clip && !this._imgNode.complete) return;
         var div = this._image,
-            map = this._map,
             imgNode = this.options.clip ? this._canvas : this._imgNode,
             topLeft = this._latLngToLayerPoint(this._bounds.getNorthWest()),
             size = this._latLngToLayerPoint(this._bounds.getSouthEast())._subtract(topLeft),
