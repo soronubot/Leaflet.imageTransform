@@ -80,8 +80,13 @@ L.ImageTransform = L.ImageOverlay.extend({
             onselectstart: L.Util.falseFn,
             onmousemove: L.Util.falseFn,
             onload: L.bind(this._onImageLoad, this),
+            onerror: L.bind(this._onImageError, this),
             src: this._url
         });
+    },
+
+    _onImageError: function () {
+        this.fire('error');
     },
 
     _onImageLoad: function () {
